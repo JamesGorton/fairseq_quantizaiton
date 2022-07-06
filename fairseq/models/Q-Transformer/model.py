@@ -1,10 +1,4 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-"""
-RoBERTa: A Robustly Optimized BERT Pretraining Approach.
-"""
+# Quantised simple Transformer
 
 import logging
 
@@ -30,17 +24,9 @@ from .hub_interface import RobertaHubInterface
 logger = logging.getLogger(__name__)
 
 
-@register_model("roberta")
-class RobertaModel(FairseqEncoderModel):
+@register_model("QST")
+class QSTModel(FairseqEncoderModel):
     @classmethod
-    def hub_models(cls):
-        return {
-            "roberta.base": "http://dl.fbaipublicfiles.com/fairseq/models/roberta.base.tar.gz",
-            "roberta.large": "http://dl.fbaipublicfiles.com/fairseq/models/roberta.large.tar.gz",
-            "roberta.large.mnli": "http://dl.fbaipublicfiles.com/fairseq/models/roberta.large.mnli.tar.gz",
-            "roberta.large.wsc": "http://dl.fbaipublicfiles.com/fairseq/models/roberta.large.wsc.tar.gz",
-        }
-
     def __init__(self, args, encoder):
         super().__init__(encoder)
         self.args = args
@@ -234,7 +220,7 @@ class RobertaModel(FairseqEncoderModel):
                 args.tokens_per_sample = task.max_positions()
             args.max_positions = args.tokens_per_sample
 
-        encoder = RobertaEncoder(args, task.source_dictionary)
+        encoder = QSTEncoder(args, task.source_dictionary)
 
         if OmegaConf.is_config(args):
             OmegaConf.set_struct(args, True)
@@ -533,8 +519,8 @@ class RobertaClassificationHead(nn.Module):
         return x
 
 
-class RobertaEncoder(FairseqEncoder):
-    """RoBERTa encoder."""
+class QSTEncoder(FairseqEncoder):
+    """QST encoder."""
 
     def __init__(self, args, dictionary):
         super().__init__(dictionary)
@@ -674,27 +660,4 @@ def base_architecture(args):
 def roberta_prenorm_architecture(args):
     args.layernorm_embedding = safe_getattr(args, "layernorm_embedding", False)
     args.encoder_normalize_before = safe_getattr(args, "encoder_normalize_before", True)
-    base_architecture(args)
-
-
-@register_model_architecture("roberta", "roberta_base")
-def roberta_base_architecture(args):
-    base_architecture(args)
-
-
-@register_model_architecture("roberta", "roberta_large")
-def roberta_large_architecture(args):
-    args.encoder_layers = safe_getattr(args, "encoder_layers", 24)
-    args.encoder_embed_dim = safe_getattr(args, "encoder_embed_dim", 1024)
-    args.encoder_ffn_embed_dim = safe_getattr(args, "encoder_ffn_embed_dim", 4096)
-    args.encoder_attention_heads = safe_getattr(args, "encoder_attention_heads", 16)
-    base_architecture(args)
-
-
-@register_model_architecture("roberta", "xlm")
-def xlm_architecture(args):
-    args.encoder_layers = safe_getattr(args, "encoder_layers", 16)
-    args.encoder_embed_dim = safe_getattr(args, "encoder_embed_dim", 1280)
-    args.encoder_ffn_embed_dim = safe_getattr(args, "encoder_ffn_embed_dim", 1280 * 4)
-    args.encoder_attention_heads = safe_getattr(args, "encoder_attention_heads", 16)
     base_architecture(args)
