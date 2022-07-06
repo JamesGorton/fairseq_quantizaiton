@@ -49,8 +49,6 @@ class RobertaModel(FairseqEncoderModel):
         self.apply(init_bert_params)
 
         self.classification_heads = nn.ModuleDict()
-<details>
-<summary>Click to expand static method </summary>
 
     @staticmethod
     def add_args(parser):
@@ -218,7 +216,6 @@ class RobertaModel(FairseqEncoderModel):
             default=-1,
             help="number of feedforward blocks to remove in each transformer layer, -1 means keeping all ffn blocks",
         )
-</details>
 
     @classmethod
     def build_model(cls, args, task):
