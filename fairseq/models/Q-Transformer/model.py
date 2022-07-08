@@ -220,6 +220,7 @@ class QSTModel(FairseqEncoderModel):
                 args.tokens_per_sample = task.max_positions()
             args.max_positions = args.tokens_per_sample
 
+            
         encoder = QSTEncoder(args, task.source_dictionary)
 
         if OmegaConf.is_config(args):
