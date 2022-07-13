@@ -17,7 +17,7 @@ from typing import Callable, List, Optional, Tuple, Union
 import math
 import warnings
 
-def linear(input, weight, bias=None):
+def qlinear(input, weight, bias=None):
     """
     Applies a linear transformation to the incoming data: :math:`y = xA^T + b`.
 
