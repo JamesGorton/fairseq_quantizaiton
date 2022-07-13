@@ -34,7 +34,7 @@ def module_name_fordropout(module_name: str) -> str:
         return module_name
 
 
-class TransformerEncoderBase(FairseqEncoder):
+class QuantTransformerEncoderBase(FairseqEncoder):
     """
     Transformer encoder consisting of *cfg.encoder.layers* layers. Each layer
     is a :class:`TransformerEncoderLayer`.
