@@ -1,38 +1,36 @@
-import warnings
-import math
-from operator import mul
-from functools import reduce
+# Inherit from Function
+class LinearFunction(Function):
 
-import torch
-from torch._C import _infer_size, _add_docstr
-from . import _functions
-from .modules import utils
-from ._functions.linear import Bilinear
-from ._functions.padding import ConstantPadNd
-from ._functions.vision import GridSampler, AffineGridGenerator
-from torch.autograd import Variable
-from .modules.utils import _single, _pair, _triple
-r"""Functional interface"""
-from typing import Callable, List, Optional, Tuple, Union
-import math
-import warnings
+    # Note that both forward and backward are @staticmethods
+    @staticmethod
+    # bias is an optional argument
+    def forward(ctx, input, weight, bias=None):
+        ctx.save_for_backward(input, weight, bias)
+        output = input.mm(weight.t())
+        if bias is not None:
+            output += bias.unsqueeze(0).expand_as(output)
+        return output
 
-def qlinear(input, weight, bias=None):
-    """
-    Applies a linear transformation to the incoming data: :math:`y = xA^T + b`.
+    # This function has only a single output, so it gets only one gradient
+    @staticmethod
+    def backward(ctx, grad_output):
+        # This is a pattern that is very convenient - at the top of backward
+        # unpack saved_tensors and initialize all gradients w.r.t. inputs to
+        # None. Thanks to the fact that additional trailing Nones are
+        # ignored, the return statement is simple even when the function has
+        # optional inputs.
+        input, weight, bias = ctx.saved_tensors
+        grad_input = grad_weight = grad_bias = None
 
-    Shape:
-        - Input: :math:`(N, *, in\_features)` where `*` means any number of
-          additional dimensions
-        - Weight: :math:`(out\_features, in\_features)`
-        - Bias: :math:`(out\_features)`
-        - Output: :math:`(N, *, out\_features)`
-    """
-    if input.dim() == 2 and bias is not None:
-        # fused op is marginally faster
-        return torch.addmm(bias, input, weight.t())
+        # These needs_input_grad checks are optional and there only to
+        # improve efficiency. If you want to make your code simpler, you can
+        # skip them. Returning gradients for inputs that don't require it is
+        # not an error.
+        if ctx.needs_input_grad[0]:
+            grad_input = grad_output.mm(weight)
+        if ctx.needs_input_grad[1]:
+            grad_weight = grad_output.t().mm(input)
+        if bias is not None and ctx.needs_input_grad[2]:
+            grad_bias = grad_output.sum(0)
 
-    output = input.matmul(weight.t())
-    if bias is not None:
-        output += bias
-    return output
+        return grad_input, grad_weight, grad_bias
