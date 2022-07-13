@@ -20,7 +20,7 @@ from fairseq.models.transformer import (
 )
 
 
-class TransformerModelBase(FairseqEncoderDecoderModel):
+class QuantTransformerModelBase(FairseqEncoderDecoderModel):
     """
     Transformer model from `"Attention Is All You Need" (Vaswani, et al, 2017)
     <https://arxiv.org/abs/1706.03762>`_.
@@ -47,7 +47,7 @@ class TransformerModelBase(FairseqEncoderDecoderModel):
         """Add model-specific arguments to the parser."""
         # we want to build the args recursively in this case.
         gen_parser_from_dataclass(
-            parser, TransformerConfig(), delete_default=False, with_prefix=""
+            parser, QuantTransformerConfig(), delete_default=False, with_prefix=""
         )
 
     @classmethod
@@ -112,11 +112,11 @@ class TransformerModelBase(FairseqEncoderDecoderModel):
 
     @classmethod
     def build_encoder(cls, cfg, src_dict, embed_tokens):
-        return TransformerEncoderBase(cfg, src_dict, embed_tokens)
+        return QuantTransformerEncoderBase(cfg, src_dict, embed_tokens)
 
     @classmethod
     def build_decoder(cls, cfg, tgt_dict, embed_tokens):
-        return TransformerDecoderBase(
+        return QuantTransformerDecoderBase(
             cfg,
             tgt_dict,
             embed_tokens,
